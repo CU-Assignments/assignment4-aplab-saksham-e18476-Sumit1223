@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <set> 
+
+using namespace std;
+
+vector<vector<int>> getSkyline(vector<vector<int>>& buildings) {
+    vector<vector<int>> skyline;
+    vector<pair<int, int>> events; 
+
+    for (const auto& building : buildings) {
+        events.push_back({building[0], -building[2]}); // Left edge: height negative
+        events.push_back({building[1], building[2]});  // Right edge: height positive
+    }
+
+    sort(events.begin(), events.end()); // Sort events by x-coordinate
+
+    multiset<int> heights; // Multiset to store current heights (efficient removal)
+    heights.insert(0); // Initialize with ground level
+
+    int currentHeight = 0;
+
+    for (const auto& event : events) {
+        if (event.second < 0) { // Left edge
+            heights.insert(-event.second);
+        } else { // Right edge
+            heights.erase(heights.find(event.second)); // Efficient removal
+        }
+
+        int maxHeight = *heights.rbegin(); // Get max height (last element of reversed set)
+
+        if (maxHeight != currentHeight) {
+            skyline.push_back({event.first, maxHeight});
+            currentHeight = maxHeight;
+        }
+    }
+
+    return skyline;
+}
+
+int main() {
+    vector<vector<int>> buildings = {{2, 9, 10}, {3, 7, 15}, {5, 12, 12}, {15, 20, 10}, {19, 24, 8}};
+    vector<vector<int>> skyline = getSkyline(buildings);
+
+    cout << "[";
+    for (int i = 0; i < skyline.size(); ++i) {
+        cout << "[" << skyline[i][0] << "," << skyline[i][1] << "]";
+        if (i < skyline.size() - 1) {
+            cout << ",";
+        }
+    }
+    cout << "]" << endl;  // Output: [[2,10],[3,15],[7,12],[12,0],[15,10],[20,8],[24,0]]
+
+    buildings = {{0, 2, 3}, {2, 5, 3}};
+    skyline = getSkyline(buildings);
+
+    cout << "[";
+    for (int i = 0; i < skyline.size(); ++i) {
+        cout << "[" << skyline[i][0] << "," << skyline[i][1] << "]";
+        if (i < skyline.size() - 1) {
+            cout << ",";
+        }
+    }
+    cout << "]" << endl; // Output: [[0,3],[5,0]]
+
+        buildings = {{2,9,10},{3,7,15},{5,12,12},{15,20,10},{19,24,8}};
+    skyline = getSkyline(buildings);
+
+    cout << "[";
+    for (int i = 0; i < skyline.size(); ++i) {
+        cout << "[" << skyline[i][0] << "," << skyline[i][1] << "]";
+        if (i < skyline.size() - 1) {
+            cout << ",";
+        }
+    }
+    cout << "]" << endl; // Output: [[2,10],[3,15],[7,12],[12,0],[15,10],[20,8],[24,0]]
+
+    return 0;
+}
